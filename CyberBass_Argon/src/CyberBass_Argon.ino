@@ -14,6 +14,11 @@
 #include <Adafruit_SSD1306.h>
 #include <neopixel.h>
 
+#include <Adafruit_MQTT.h>
+#include "Adafruit_MQTT/Adafruit_MQTT_SPARK.h" 
+#include "credentials.h"
+
+
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 const int PIXELCOUNT = 64;
@@ -35,13 +40,24 @@ float pressIH = 0;
 float humidRH = 0;
 
 int count = 0;
-
+int i = 0;
 
 #define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3C 
 Adafruit_SSD1306 display(OLED_RESET);
 
 Adafruit_BME280 bme;
+
+
+TCPClient TheClient; 
+
+// Setup the MQTT client class by passing in the WiFi client and MQTT server and login details. 
+Adafruit_MQTT_SPARK mqtt(&TheClient,AIO_SERVER,AIO_SERVERPORT,AIO_USERNAME,AIO_KEY); 
+Adafruit_MQTT_Publish humidityPub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Humidity");
+Adafruit_MQTT_Publish pressurePub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Pressure");
+Adafruit_MQTT_Publish temperaturePub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Temperature");
+Adafruit_MQTT_Publish NotePub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Note");
+
 
 // setup() runs once, when the device is first turned on.
 void setup() {
@@ -75,17 +91,32 @@ void setup() {
 
   // Clear the buffer
   display.clearDisplay();
-  display.setRotation(0);
+  display.setRotation(2);
 
   display.setTextSize(1);             // Normal 1:1 pixel scale
   display.setTextColor(WHITE);        // Draw white text
   display.setCursor(0,0);
-  display.println("Robopot\nPart Container\nPart Computer\nAll Pot");
+  display.println("CYBERBASS BOOTING UP!");
   display.display();
-  // Draw a single pixel in white
 
   delay(2000);
+  Serial.printf("Connecting to Internet \n");
+  display.clearDisplay();
+  display.setCursor(0,0);
+  display.printf("Connecting to Infonet\n");
+  display.display();
+  WiFi.connect();
+  while(WiFi.connecting()) {
+    Serial.printf(".");
+    delay(100);
+  }
   Time.zone(-6);
+  Particle.syncTime();
+  delay(100); //wait for Serial Monitor to startup
+
+
+  //Setup BME
+  bme.begin(0x76);
 
 
 }
@@ -97,7 +128,7 @@ void setup() {
     judaspriest
     deathmetal
 
-  receive midi data
+  receive note data
   light up
 
   operate pump.
