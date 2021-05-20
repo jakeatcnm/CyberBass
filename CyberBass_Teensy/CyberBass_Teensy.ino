@@ -39,17 +39,17 @@ int pixelBrightness = 255;
 Adafruit_NeoPixel pixel(PIXELCOUNT, PIXELPIN, NEO_GRB + NEO_KHZ800);
 
 AudioTuner                tuner;
-AudioAnalyzePeak          peak1;
+//AudioAnalyzePeak          peak1;
 AudioSynthWaveformSine    sine;
 AudioInputAnalog          adc;
 AudioMixer4               mixer;
 
 float freq = 0;
-int audioPeak = 0;
+int audioPeakLevel = 0;
 
 AudioConnection patchCord1(adc,  0, mixer, 0);
 AudioConnection patchCord2(mixer, 0, tuner, 0);
-AudioConnection patchCord3(mixer, 0, peak1, 0);
+//AudioConnection patchCord3(mixer, 0, peak1, 0);
 
 
 
@@ -71,6 +71,16 @@ void setup() {
       //initialize pixel
     pixel.begin();
     pixel.show();
+      for (int i = 0; i < PIXELCOUNT; i++){
+    pixel.clear();
+    pixel.show();
+    pixel.setPixelColor(i, random(255), random(255), random(255));
+    pixel.setBrightness(pixelBrightness);
+    pixel.show();
+    delay(100);
+    pixel.clear();
+    pixel.show();
+  }
 }
 
 void loop() {
@@ -78,11 +88,276 @@ void loop() {
     if (tuner.available()) {
         freq = tuner.read();
         float prob = tuner.probability();
-        audioPeak = peak1.read() * 30;
-        Serial.printf("Note: %3.2f | Peak: %3.2f\n", freq, audioPeak);
+        //audioPeakLevel = peak1.read();
+        Serial.printf("Note: %3.2f\n", freq);
     }
-    Serial1.printf("%3.2f, %3.2f\n", freq, audioPeak);
     
+    Serial1.printf("%3.2f\n", freq);
+    
+    
+    //Bass strings are (4th string) E1=41.20Hz, A1=55Hz, D2=73.42Hz, G2=98Hz
+    pixel.setBrightness(255);
+    if(freq > 38 && freq < 44.2){
+      if (freq < 39){
+        pixel.clear();
+        pixel.setPixelColor(0, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 40){
+        pixel.clear();
+        pixel.setPixelColor(1, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 40.3){
+        pixel.clear();
+        pixel.setPixelColor(2, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 40.6){
+        pixel.clear();
+        pixel.setPixelColor(3, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 40.8){
+        pixel.clear();
+        pixel.setPixelColor(4, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 41){
+        pixel.clear();
+        pixel.setPixelColor(5, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 41.4){
+        pixel.clear();
+        pixel.setPixelColor(6, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 41.8){
+        pixel.clear();
+        pixel.setPixelColor(7, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 42.4){
+        pixel.clear();
+        pixel.setPixelColor(8, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 43){
+        pixel.clear();
+        pixel.setPixelColor(9, 255, 0, 0);
+        pixel.show();
+      }
+      else if(freq < 43.6){
+        pixel.clear();
+        pixel.setPixelColor(10, 255, 0, 0);
+        pixel.show();
+      }
+      else{
+        pixel.clear();
+        pixel.setPixelColor(11, 255, 0, 0);
+        pixel.show();
+      }
+    }
+
+    //A1=55Hz
+    else if(freq > 50 && freq < 60){
+      if(freq < 51.0){
+        pixel.clear();
+        pixel.setPixelColor(0, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 53.0){
+        pixel.clear();
+        pixel.setPixelColor(1, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 53.5){
+        pixel.clear();
+        pixel.setPixelColor(2, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 54.0){
+        pixel.clear();
+        pixel.setPixelColor(3, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 54.5){
+        pixel.clear();
+        pixel.setPixelColor(4, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 54.8){
+        pixel.clear();
+        pixel.setPixelColor(5, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 55.2){
+        pixel.clear();
+        pixel.setPixelColor(6, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 55.6){
+        pixel.clear();
+        pixel.setPixelColor(7, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 56.0){
+        pixel.clear();
+        pixel.setPixelColor(8, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 56.8){
+        pixel.clear();
+        pixel.setPixelColor(9, 0, 255, 0);
+        pixel.show();
+      }
+      else if(freq < 57.5){
+        pixel.clear();
+        pixel.setPixelColor(10, 0, 255, 0);
+        pixel.show();
+      }
+      else{
+        pixel.clear();
+        pixel.setPixelColor(11, 0, 255, 0);
+        pixel.show();
+      }
+    }
+    //D2=73.42Hz
+    else if(freq > 63 && freq < 83){
+      if(freq < 65){
+        pixel.clear();
+        pixel.setPixelColor(0, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 67.5){
+        pixel.clear();
+        pixel.setPixelColor(1, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 69.0){
+        pixel.clear();
+        pixel.setPixelColor(2, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 70){
+        pixel.clear();
+        pixel.setPixelColor(3, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 71.5){
+        pixel.clear();
+        pixel.setPixelColor(4, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 73.22){
+        pixel.clear();
+        pixel.setPixelColor(5, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 73.62){
+        pixel.clear();
+        pixel.setPixelColor(6, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 75.5){
+        pixel.clear();
+        pixel.setPixelColor(7, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 77.75){
+        pixel.clear();
+        pixel.setPixelColor(8, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 79){
+        pixel.clear();
+        pixel.setPixelColor(9, 0, 0, 255);
+        pixel.show();
+      }
+      else if(freq < 81){
+        pixel.clear();
+        pixel.setPixelColor(10, 0, 0, 255);
+        pixel.show();
+      }
+      else{
+        pixel.clear();
+        pixel.setPixelColor(11, 0, 0, 255);
+        pixel.show();
+      }
+    }
+    
+    //G2=98Hz
+    else if(freq > 90 && freq < 106){
+      if(freq < 92.5){
+        pixel.clear();
+        pixel.setPixelColor(0, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 94){
+        pixel.clear();
+        pixel.setPixelColor(1, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 95.25){
+        pixel.clear();
+        pixel.setPixelColor(2, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 96.25){
+        pixel.clear();
+        pixel.setPixelColor(3, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 97.35){
+        pixel.clear();
+        pixel.setPixelColor(4, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 97.8){
+        pixel.clear();
+        pixel.setPixelColor(5, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 98.2){
+        pixel.clear();
+        pixel.setPixelColor(6, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 98.65){
+        pixel.clear();
+        pixel.setPixelColor(7, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 99){
+        pixel.clear();
+        pixel.setPixelColor(8, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 100.5){
+        pixel.clear();
+        pixel.setPixelColor(9, 255, 255, 255);
+        pixel.show();
+      }
+      else if(freq < 102.5){
+        pixel.clear();
+        pixel.setPixelColor(10, 255, 255, 255);
+        pixel.show();
+      }
+      else{
+        pixel.clear();
+        pixel.setPixelColor(11, 255, 255, 255);
+        pixel.show();
+      }
+    }
+    else{
+       pixel.setBrightness(5);
+       pixel.clear();
+       for(int i = 0; i < PIXELCOUNT; i++){
+        pixel.setPixelColor(i, 255, 0, 0);   
+       }
+       pixel.show();
+    }
     
     if (Serial.available()) {
         Serial.readBytesUntil('\n', buffer, 10);
