@@ -1,4 +1,9 @@
-/*
+/* PROJECT:  CyberBass
+ * DESCRIPTION: Detect Note from audio input and display a tuner;
+ * AUTHOR: Jake Millington
+ * DATE: 20-MAY-2021
+ * 
+ * 
      C     C#    D     Eb    E     F     F#    G     G#    A     Bb    B
  0 16.35 17.32 18.35 19.45 20.60 21.83 23.12 24.50 25.96 27.50 29.14 30.87
  1 32.70 34.65 36.71 38.89 41.20 43.65 46.25 49.00 51.91 55.00 58.27 61.74
@@ -46,6 +51,7 @@ AudioMixer4               mixer;
 
 float freq = 0;
 int audioPeakLevel = 0;
+bool tuneMe = TRUE;
 
 AudioConnection patchCord1(adc,  0, mixer, 0);
 AudioConnection patchCord2(mixer, 0, tuner, 0);
@@ -93,62 +99,80 @@ void loop() {
     }
     
     Serial1.printf("%3.2f\n", freq);
+    if(tuneMe){
+    showTuner(freq);
+    }
     
     
+    if (Serial.available()) {
+        Serial.readBytesUntil('\n', buffer, 10);
+        tuneMe = handleCmds( buffer );
+    }
+    else{
+       pixel.setBrightness(5);
+       pixel.clear();
+       for(int i = 0; i < PIXELCOUNT; i++){
+        pixel.setPixelColor(i, 255, 0, 0);   
+       }
+       pixel.show();
+    }
+}
+
+void showTuner(float _freq){
     //Bass strings are (4th string) E1=41.20Hz, A1=55Hz, D2=73.42Hz, G2=98Hz
     pixel.setBrightness(255);
-    if(freq > 38 && freq < 44.2){
-      if (freq < 39){
+    if(_freq > 38 && _freq < 44.2){
+      if (_freq < 39){
         pixel.clear();
         pixel.setPixelColor(0, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 40){
+      else if(_freq < 40){
         pixel.clear();
         pixel.setPixelColor(1, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 40.3){
+      else if(_freq < 40.3){
         pixel.clear();
         pixel.setPixelColor(2, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 40.6){
+      else if(_freq < 40.6){
         pixel.clear();
         pixel.setPixelColor(3, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 40.8){
+      else if(_freq < 40.8){
         pixel.clear();
         pixel.setPixelColor(4, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 41){
+      else if(_freq < 41){
         pixel.clear();
         pixel.setPixelColor(5, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 41.4){
+      else if(_freq < 41.4){
         pixel.clear();
         pixel.setPixelColor(6, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 41.8){
+      else if(_freq < 41.8){
         pixel.clear();
         pixel.setPixelColor(7, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 42.4){
+      else if(_freq < 42.4){
         pixel.clear();
         pixel.setPixelColor(8, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 43){
+      else if(_freq < 43){
         pixel.clear();
         pixel.setPixelColor(9, 255, 0, 0);
         pixel.show();
       }
-      else if(freq < 43.6){
+      else if(_freq < 43.6){
         pixel.clear();
         pixel.setPixelColor(10, 255, 0, 0);
         pixel.show();
@@ -161,58 +185,58 @@ void loop() {
     }
 
     //A1=55Hz
-    else if(freq > 50 && freq < 60){
-      if(freq < 51.0){
+    else if(_freq > 50 && _freq < 60){
+      if(_freq < 51.0){
         pixel.clear();
         pixel.setPixelColor(0, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 53.0){
+      else if(_freq < 53.0){
         pixel.clear();
         pixel.setPixelColor(1, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 53.5){
+      else if(_freq < 53.5){
         pixel.clear();
         pixel.setPixelColor(2, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 54.0){
+      else if(_freq < 54.0){
         pixel.clear();
         pixel.setPixelColor(3, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 54.5){
+      else if(_freq < 54.5){
         pixel.clear();
         pixel.setPixelColor(4, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 54.8){
+      else if(_freq < 54.8){
         pixel.clear();
         pixel.setPixelColor(5, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 55.2){
+      else if(_freq < 55.2){
         pixel.clear();
         pixel.setPixelColor(6, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 55.6){
+      else if(_freq < 55.6){
         pixel.clear();
         pixel.setPixelColor(7, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 56.0){
+      else if(_freq < 56.0){
         pixel.clear();
         pixel.setPixelColor(8, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 56.8){
+      else if(_freq < 56.8){
         pixel.clear();
         pixel.setPixelColor(9, 0, 255, 0);
         pixel.show();
       }
-      else if(freq < 57.5){
+      else if(_freq < 57.5){
         pixel.clear();
         pixel.setPixelColor(10, 0, 255, 0);
         pixel.show();
@@ -224,58 +248,58 @@ void loop() {
       }
     }
     //D2=73.42Hz
-    else if(freq > 63 && freq < 83){
-      if(freq < 65){
+    else if(_freq > 63 && _freq < 83){
+      if(_freq < 65){
         pixel.clear();
         pixel.setPixelColor(0, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 67.5){
+      else if(_freq < 67.5){
         pixel.clear();
         pixel.setPixelColor(1, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 69.0){
+      else if(_freq < 69.0){
         pixel.clear();
         pixel.setPixelColor(2, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 70){
+      else if(_freq < 70){
         pixel.clear();
         pixel.setPixelColor(3, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 71.5){
+      else if(_freq < 71.5){
         pixel.clear();
         pixel.setPixelColor(4, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 73.22){
+      else if(_freq < 73.22){
         pixel.clear();
         pixel.setPixelColor(5, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 73.62){
+      else if(_freq < 73.62){
         pixel.clear();
         pixel.setPixelColor(6, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 75.5){
+      else if(_freq < 75.5){
         pixel.clear();
         pixel.setPixelColor(7, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 77.75){
+      else if(_freq < 77.75){
         pixel.clear();
         pixel.setPixelColor(8, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 79){
+      else if(_freq < 79){
         pixel.clear();
         pixel.setPixelColor(9, 0, 0, 255);
         pixel.show();
       }
-      else if(freq < 81){
+      else if(_freq < 81){
         pixel.clear();
         pixel.setPixelColor(10, 0, 0, 255);
         pixel.show();
@@ -288,58 +312,58 @@ void loop() {
     }
     
     //G2=98Hz
-    else if(freq > 90 && freq < 106){
-      if(freq < 92.5){
+    else if(_freq > 90 && _freq < 106){
+      if(_freq < 92.5){
         pixel.clear();
         pixel.setPixelColor(0, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 94){
+      else if(_freq < 94){
         pixel.clear();
         pixel.setPixelColor(1, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 95.25){
+      else if(_freq < 95.25){
         pixel.clear();
         pixel.setPixelColor(2, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 96.25){
+      else if(_freq < 96.25){
         pixel.clear();
         pixel.setPixelColor(3, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 97.35){
+      else if(_freq < 97.35){
         pixel.clear();
         pixel.setPixelColor(4, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 97.8){
+      else if(_freq < 97.8){
         pixel.clear();
         pixel.setPixelColor(5, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 98.2){
+      else if(_freq < 98.2){
         pixel.clear();
         pixel.setPixelColor(6, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 98.65){
+      else if(_freq < 98.65){
         pixel.clear();
         pixel.setPixelColor(7, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 99){
+      else if(_freq < 99){
         pixel.clear();
         pixel.setPixelColor(8, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 100.5){
+      else if(_freq < 100.5){
         pixel.clear();
         pixel.setPixelColor(9, 255, 255, 255);
         pixel.show();
       }
-      else if(freq < 102.5){
+      else if(_freq < 102.5){
         pixel.clear();
         pixel.setPixelColor(10, 255, 255, 255);
         pixel.show();
@@ -358,9 +382,5 @@ void loop() {
        }
        pixel.show();
     }
-    
-    if (Serial.available()) {
-        Serial.readBytesUntil('\n', buffer, 10);
-        handleCmds( buffer );
-    }
+
 }

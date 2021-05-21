@@ -19,7 +19,7 @@
 //#include <wemo.h>
 #include <Adafruit_SSD1306.h>
 #include <neopixel.h>
-
+#include <OneButton.h>
 #include <Adafruit_MQTT.h>
 #include "Adafruit_MQTT/Adafruit_MQTT_SPARK.h" 
 #include "credentials.h"
@@ -27,12 +27,17 @@
 
 void setup();
 void loop();
+void MQTT_connect();
+float convertToFarenheit(float celsius);
+float convertToInHg( float pascals);
 #line 22 "c:/Users/jake/Documents/IoT/CyberBass/CyberBass_Argon/src/CyberBass_Argon.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 const int PIXELCOUNT = 64;
 
-const int ENCODERPIN = D5;        
+const int PIXELPIN = D18;
+const int ENCODER_A = D5;
+const int ENCODER_B = D7;        
 const int GREENPIN = D11;
 const int REDPIN = D12;
 const int ENCODERSWITCH = D13;
@@ -50,13 +55,15 @@ float humidRH = 0;
 
 int count = 0;
 int i = 0;
+int mqttTime = 0;
+int last = 0;
 
 #define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3C 
 Adafruit_SSD1306 display(OLED_RESET);
 
 Adafruit_BME280 bme;
-
+Encoder encoder(ENCODER_A, ENCODER_B);
 
 TCPClient TheClient; 
 
@@ -114,11 +121,11 @@ void setup() {
   display.setCursor(0,0);
   display.printf("Connecting to Infonet\n");
   display.display();
-  WiFi.connect();
-  while(WiFi.connecting()) {
-    Serial.printf(".");
-    delay(100);
-  }
+  // WiFi.connect();
+  // while(WiFi.connecting()) {
+  //   Serial.printf(".");
+  //   delay(100);
+  // }
   Time.zone(-6);
   Particle.syncTime();
   delay(100); //wait for Serial Monitor to startup
@@ -146,17 +153,57 @@ void setup() {
 
 // loop() runs over and over again, as quickly as it can execute.
 void loop() {
-  
+  //MQTT_connect();
+
+  // Ping MQTT Broker every 2 minutes to keep connection alive
+
+  // if ((millis()-last)>120000) {
+  //     Serial.printf("Pinging MQTT \n");
+  //     if(! mqtt.ping()) {
+  //       Serial.printf("Disconnecting \n");
+  //       mqtt.disconnect();
+  //     }
+  //     last = millis();
+  // }
 
   //enable blood spewing
   bool bloody = digitalRead(PUMPBUTTON);
   if(bloody){
     digitalWrite(PUMPOUT, HIGH);
+    Serial.println("BUTTON PRESSED");
   }
   else{
     digitalWrite(PUMPOUT, LOW);
   }
 
-  
+
+
+}
+void MQTT_connect() {
+  int8_t ret;
+ 
+  // Stop if already connected.
+  if (mqtt.connected()) {
+    return;
+  }
+ 
+  Serial.print("Connecting to MQTT... ");
+ 
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Serial.println(mqtt.connectErrorString(ret));
+       Serial.println("Retrying MQTT connection in 5 seconds...");
+       mqtt.disconnect();
+       delay(5000);  // wait 5 seconds
+  }
+  Serial.println("MQTT Connected!");
 }
 
+float convertToFarenheit(float celsius){
+  float farenheit = (celsius * 1.8) + 32;
+  return farenheit;
+}
+
+float convertToInHg( float pascals){
+  float mercury = pascals / 3386.389;
+  return mercury;
+}

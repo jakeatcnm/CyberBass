@@ -44,6 +44,7 @@ float humidRH = 0;
 int count = 0;
 int i = 0;
 int mqttTime = 0;
+int last = 0;
 
 #define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3C 
@@ -108,11 +109,11 @@ void setup() {
   display.setCursor(0,0);
   display.printf("Connecting to Infonet\n");
   display.display();
-  WiFi.connect();
-  while(WiFi.connecting()) {
-    Serial.printf(".");
-    delay(100);
-  }
+  // WiFi.connect();
+  // while(WiFi.connecting()) {
+  //   Serial.printf(".");
+  //   delay(100);
+  // }
   Time.zone(-6);
   Particle.syncTime();
   delay(100); //wait for Serial Monitor to startup
@@ -140,22 +141,24 @@ void setup() {
 
 // loop() runs over and over again, as quickly as it can execute.
 void loop() {
-  MQTT_connect();
+  //MQTT_connect();
 
   // Ping MQTT Broker every 2 minutes to keep connection alive
-  if ((millis()-last)>120000) {
-      Serial.printf("Pinging MQTT \n");
-      if(! mqtt.ping()) {
-        Serial.printf("Disconnecting \n");
-        mqtt.disconnect();
-      }
-      last = millis();
-  }
+
+  // if ((millis()-last)>120000) {
+  //     Serial.printf("Pinging MQTT \n");
+  //     if(! mqtt.ping()) {
+  //       Serial.printf("Disconnecting \n");
+  //       mqtt.disconnect();
+  //     }
+  //     last = millis();
+  // }
 
   //enable blood spewing
   bool bloody = digitalRead(PUMPBUTTON);
   if(bloody){
     digitalWrite(PUMPOUT, HIGH);
+    Serial.println("BUTTON PRESSED");
   }
   else{
     digitalWrite(PUMPOUT, LOW);
