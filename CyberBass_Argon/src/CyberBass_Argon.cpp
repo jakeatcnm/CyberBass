@@ -27,9 +27,14 @@
 
 void setup();
 void loop();
+void priestMode();
+void deathMetalMode();
+void tempMode();
+void toggleTuner();
 void MQTT_connect();
 float convertToFarenheit(float celsius);
 float convertToInHg( float pascals);
+bool handleCmds( String cmd );
 #line 22 "c:/Users/jake/Documents/IoT/CyberBass/CyberBass_Argon/src/CyberBass_Argon.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
@@ -46,6 +51,9 @@ const int TRIGPIN = D15;
 const int ECHOPIN = D16;
 const int PUMPOUT = D17;
 
+int pixelBrightness = 255;
+#define PIXEL_TYPE WS2812B
+Adafruit_NeoPixel pixel(PIXELCOUNT, PIXELPIN, PIXEL_TYPE);
 
 float tempC = 0;
 float tempF = 0;
@@ -57,6 +65,8 @@ int count = 0;
 int i = 0;
 int mqttTime = 0;
 int last = 0;
+
+char buffer[10];
 
 #define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3C 
@@ -73,6 +83,12 @@ Adafruit_MQTT_Publish humidityPub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/
 Adafruit_MQTT_Publish pressurePub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Pressure");
 Adafruit_MQTT_Publish temperaturePub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Temperature");
 Adafruit_MQTT_Publish NotePub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Note");
+
+bool tunerState = true;
+
+MPU6050 accelgyro;
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
 
 
 // setup() runs once, when the device is first turned on.
@@ -126,6 +142,18 @@ void setup() {
   //   Serial.printf(".");
   //   delay(100);
   // }
+  pixel.begin();
+    pixel.show();
+    for (int i = 0; i < PIXELCOUNT; i++){
+      pixel.clear();
+      pixel.show();
+      pixel.setPixelColor(i, random(255), random(255), random(255));
+      pixel.setBrightness(pixelBrightness);
+      pixel.show();
+      delay(25);
+      pixel.clear();
+      pixel.show();
+  }
   Time.zone(-6);
   Particle.syncTime();
   delay(100); //wait for Serial Monitor to startup
@@ -133,7 +161,16 @@ void setup() {
 
   //Setup BME
   bme.begin(0x76);
+  pixel.clear();
+  pixel.show();
 
+  Serial.println("Initializing I2C devices...");
+  accelgyro.initialize();
+
+    // Cerify the connection:
+  Serial.println("Testing device connections...");
+  Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+    
 
 }
 
@@ -143,6 +180,8 @@ void setup() {
     normal
     judaspriest
     deathmetal
+    weather
+    Toggle Tuner
 
   receive note data
   light up
@@ -175,10 +214,65 @@ void loop() {
   else{
     digitalWrite(PUMPOUT, LOW);
   }
+  if (Serial1.available()) {
+        Serial1.readBytesUntil('\n', buffer, 10);
+        handleCmds( buffer );
+  }
+
 
 
 
 }
+
+void priestMode(){
+  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+  Serial.print("a/g:\t");
+  Serial.print(ax); Serial.print("\t");
+  Serial.print(ay); Serial.print("\t");
+  Serial.print(az); Serial.print("\t");
+  Serial.print(gx); Serial.print("\t");
+  Serial.print(gy); Serial.print("\t");
+  Serial.println(gz);
+}
+
+void deathMetalMode(){
+  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    Serial.print("a/g:\t");
+    Serial.print(ax); Serial.print("\t");
+    Serial.print(ay); Serial.print("\t");
+    Serial.print(az); Serial.print("\t");
+    Serial.print(gx); Serial.print("\t");
+    Serial.print(gy); Serial.print("\t");
+    Serial.println(gz);
+}
+
+
+void tempMode(){
+  tempC = bme.readTemperature();
+  tempF = convertToFarenheit(tempC);
+  pressPA = bme.readPressure();
+  pressIH = convertToInHg(pressPA);
+  humidRH = bme.readHumidity();
+  for(i = 0; i < PIXELCOUNT; i++){
+        pixel.clear();
+        pixel.setPixelColor(i, int(tempF), int(pressPA), int(humidRH));
+        pixel.show();
+  }
+
+}
+
+void toggleTuner(){
+  if(tunerState){
+    Serial1.println("TUNER_OFF");
+    tunerState = false;
+  }
+  else{
+    Serial1.println("TUNER_ON");
+    tunerState = true;
+  }
+}
+
+
 void MQTT_connect() {
   int8_t ret;
  
@@ -206,4 +300,12 @@ float convertToFarenheit(float celsius){
 float convertToInHg( float pascals){
   float mercury = pascals / 3386.389;
   return mercury;
+}
+
+bool handleCmds( String cmd ) {
+    String p = cmd;
+    
+        p.trim();
+        float freq = p.toFloat();
+
 }
